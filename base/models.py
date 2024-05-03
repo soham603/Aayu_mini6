@@ -79,3 +79,14 @@ class Video(models.Model):
     @property
     def get_video_url(self):
         return self.video_file.url
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class QuizScore(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.CharField(max_length=100)
+    score = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.user.username}'s {self.category} Quiz Score: {self.score}"

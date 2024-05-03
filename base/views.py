@@ -2,15 +2,17 @@ import json
 from pydoc_data.topics import topics
 from turtle import pos
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse 
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Item, Message, Room, Topic , Message, UserProfile
+from .models import Item, Message, Room, Topic , Message, UserProfile, QuizScore
 from .forms import CompleteProfileForm, CustomUserCreationForm, RoomForm ,UserForm
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login , logout
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.http import JsonResponse
 import razorpay
 
 
@@ -47,9 +49,9 @@ def loginPage(request):
     return render(request,'base/login_register.html',context)
 
 
-def logoutUser(request):
+def logout_user(request):
     logout(request)
-    return redirect('home')
+    return redirect(reverse('home'))
 
 def registerPage(request):
     # page = 'register'
@@ -404,3 +406,20 @@ def video_list_student(request):
 def assessments(request):
     # Your logic for the assessments view
     return render(request, 'base/assessments.html')
+
+def scores(request):
+    # Your logic for the assessments view
+    return render(request, 'base/scores.html')
+
+
+def save_quiz_score(request):
+    if request.method == 'POST':
+        category = request.POST.get('category')
+        score = int(request.POST.get('score'))
+        # Assuming the user is authenticated and you have their email
+        user = request.user
+        # Save the quiz score to the database
+        QuizScore.objects.create(user=user, category=category, score=score)
+        return JsonResponse({'message': 'Quiz score saved successfully'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

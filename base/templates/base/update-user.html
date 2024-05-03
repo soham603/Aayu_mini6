@@ -36,6 +36,11 @@
                     <div class="form__action">
                         <a class="btn btn--dark" href="{% url 'home_mentor' %}">Cancel</a>
                         <button class="btn btn--main" type="submit">Update</button>
+                        <form id="logoutForm" action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn btn--main" type="submit">Log Out</button>
+                        </form>
+                                                
                     </div>
                 </form>
             </div>

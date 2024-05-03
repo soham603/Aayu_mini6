@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+# Add this line to allow embedding pages in iframes
+X_FRAME_OPTIONS = 'ALLOWALL'
 
 # Application definition
 

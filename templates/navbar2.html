@@ -1,4 +1,52 @@
 {% load static %}
+<style>
+  /* Add this CSS to your stylesheet */
+.container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.extra_nav {
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.header__search {
+    flex: 2 1 auto;
+    max-width: 500px; /* Adjust as needed */
+}
+
+.header__user {
+    flex: 1;
+    text-align: right;
+    font-size: medium;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+</style>
+
 <header class="header header--loggedIn">
     <div class="container">
       

@@ -1,0 +1,657 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            left: 0;
+            background-color: #2d2d39;
+        }
+
+        .sidetxt {
+            font-family: "Poppins", sans-serif;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidetxt:hover {
+            color: wheat;
+        }
+
+        .nav {
+            margin-top: 7.5%;
+            min-height: 91vh;
+            /* Set background color to transparent */
+            display: flex;
+            flex-direction: column;
+            gap: 130px;
+            justify-content: space-between;
+        }
+
+        .nav-option {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            /* Adjust padding */
+            gap: 25px;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .nav-option:hover {
+            background-color: #3f0097;
+            /* Change background color on hover */
+            cursor: pointer;
+        }
+
+        .nav-img {
+            height: 30px;
+            width: 20px;
+            background-color: #5500cb;
+        }
+
+        .nav-upper-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* Adjust gap between options */
+        }
+
+        /* Updated CSS for content */
+        .content {
+            margin-top: 20px;
+            text-align: center;
+            border: solid 2px white;
+            border-radius: 20px;
+            margin-left: 270px;
+            margin-right: 20px;
+        }
+
+        /* Rest of your CSS remains unchanged */
+        .alldiv {
+            margin-top: 20px;
+            /* Add margin to separate from the boxes */
+            border: solid wheat;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        #chart {
+            margin-right: 20px;
+        }
+
+        #boxheading{
+            margin-left: 20px;
+            text-align: start;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .box-container {
+            margin-left: 360px;
+            display: flex;
+            justify-content: flex-start;
+            /* Align boxes next to the sidebar */
+            gap: 100px;
+            margin-top: 15px;
+            /* Adjust margin to leave space for the sidebar */
+        }
+
+        .box {
+            height: 120px;
+            width: 200px;
+            border-radius: 20px;
+            box-shadow: 3px 3px 10px rgba(0, 30, 87, 0.751);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .box:hover {
+            transform: scale(1.08);
+        }
+
+        .box:nth-child(1) {
+            background-color: #3f0097;
+        }
+
+        .box:nth-child(2) {
+            background-color: #5500cb;
+        }
+
+        .box:nth-child(3) {
+            background-color: #3f0097;
+        }
+
+        .box:nth-child(4) {
+            background-color: #5500cb;
+        }
+
+        .box img {
+            height: 45px;
+            width: 45px;
+        }
+
+        .box .text {
+            color: white;
+        }
+
+        .topic {
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .topic-heading {
+            font-size: 30px;
+            letter-spacing: 3px;
+        }
+
+        .containerrs {
+            margin-top: 10px;
+            margin-left: 30px;
+        }
+
+        .rowws {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .boxxs {
+            width: calc(33.33% - 200px);
+            /* Adjust width according to your preference */
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .contentts {
+            text-align: left;
+        }
+
+        /* Increase size of Flutter, React, and Python text */
+        .boxxs p:first-child {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Change text color to black */
+        .boxxs p {
+            color: #000000;
+        }
+
+        #dashboard-title {
+            color: white;
+            font-weight: bold;
+            font-size: 30px;
+            margin-bottom: 0;
+        }
+
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script type="module">
+        // Your JavaScript code goes here
+        // Remove the import statement for 'firebase-firestore'
+        // Keep the import statement for 'firebase-app' and 'getFirestore'
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-analytics.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDestI57XONc_T9yB4_6FcsG1-Sh7fAX-w",
+            authDomain: "miniprj-sem6.firebaseapp.com",
+            projectId: "miniprj-sem6",
+            storageBucket: "miniprj-sem6.appspot.com",
+            messagingSenderId: "691832916562",
+            appId: "1:691832916562:web:d85806c2d3d33a3fa16d8b",
+            measurementId: "G-G14VXQ8BH5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app); // Pass the app object to getFirestore
+
+        // Get the username from localStorage
+        const username = localStorage.getItem('username');
+
+        // Update the content of the dashboard title
+        document.getElementById('dashboard-title').textContent = `${username}'s Dashboard`;
+
+        // Reference to the scores collection
+        const scoresCollection = collection(db, 'users', username, 'QuizScores');
+
+        // Initialize variables
+        let totalScore = 0;
+        let scores = [];
+
+
+       // Function to count documents in 'users' collection
+function countUserDocuments() {
+    getDocs(collection(db, 'users')).then((querySnapshot) => {
+        const userCount = querySnapshot.size;
+        document.getElementById("userCount").textContent = userCount;
+        console.log("UserCount is", userCount);
+        // Store the count in Firebase Storage or perform any other action
+    }).catch((error) => {
+        console.error("Error getting documents: ", error);
+    });
+}
+
+// Function to count users with 'QuizScore' subcollection
+function countUsersWithQuizScores() {
+    // Query the 'users' collection
+    getDocs(collection(db, 'users')).then((querySnapshot) => {
+        let userCountWithQuizScores = 0;
+        querySnapshot.forEach((doc) => {
+            // Check if the document has a subcollection named 'QuizScores'
+            getDocs(collection(doc.ref, 'QuizScores')).then((subcollectionSnapshot) => {
+                // If the subcollection exists, increment the count
+                if (!subcollectionSnapshot.empty) {
+                    userCountWithQuizScores++;
+                }
+                // Update the count in the HTML
+                document.getElementById("quizScoreUserCount").textContent = userCountWithQuizScores;
+                console.log("QUizes appeared by" ,userCountWithQuizScores);
+            }).catch((error) => {
+                console.error("Error getting subcollection documents: ", error);
+            });
+        });
+    }).catch((error) => {
+        console.error("Error getting documents: ", error);
+    });
+}
+
+// Call the functions to get counts
+countUserDocuments();
+countUsersWithQuizScores();
+
+// Function to find the sum of lengths of all documents in 'QuizScores' subcollection
+function sumOfQuizScoresLength() {
+    // Initialize variable to hold the sum
+    let sum = 0;
+
+    // Query the 'users' collection
+    getDocs(collection(db, 'users')).then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            // Check if the document has a subcollection named 'QuizScores'
+            getDocs(collection(doc.ref, 'QuizScores')).then((subcollectionSnapshot) => {
+                // If the subcollection exists, add the length of documents to the sum
+                if (!subcollectionSnapshot.empty) {
+                    subcollectionSnapshot.forEach((subDoc) => {
+                        sum += 1; // Add 1 for each document
+                    });
+                }
+                // Update the sum in the HTML
+                document.getElementById("sumOfQuizScoresLength").textContent = sum;
+                console.log("Total net quizes solved:", sum);
+            }).catch((error) => {
+                console.error("Error getting subcollection documents: ", error);
+            });
+        });
+    }).catch((error) => {
+        console.error("Error getting documents: ", error);
+    });
+}
+
+sumOfQuizScoresLength();
+
+// Function to calculate sum of marks for each subject and categories in 'QuizScores' subcollection
+function calculateSumOfMarks() {
+    const username = localStorage.getItem("username");
+
+    // Initialize variables to hold sums
+    let flutterSum = 0;
+    let reactSum = 0;
+    let pythonSum = 0;
+    let totalMarksFlutter = 0;
+    let totalMarksReact = 0;
+    let totalMarksPython = 0;
+    let flutterOutOf = 0;
+    let reactOutOf = 0;
+    let pythonOutOf = 0;
+
+    // Query the 'QuizScores' subcollection for the specific user
+    getDocs(collection(db, 'users', username, 'QuizScores')).then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            // Filter documents based on category and calculate sums
+            if (data.category === "flutter") {
+                flutterSum += data.score;
+                totalMarksFlutter++;
+            } else if (data.category === "react") {
+                reactSum += data.score;
+                totalMarksReact++;
+            } else if (data.category === "python") {
+                pythonSum += data.score;
+                totalMarksPython++;
+            }
+        });
+
+        // Log the sums
+        console.log("Flutter sum:", flutterSum);
+        console.log("React sum:", reactSum);
+        console.log("Python sum:", pythonSum);
+        console.log("Total marks in Flutter:", totalMarksFlutter);
+        console.log("Total marks in React:", totalMarksReact);
+        console.log("Total marks in Python:", totalMarksPython);
+
+        // Update the HTML with the sums
+        document.getElementById("flutterSum").textContent = flutterSum;
+        document.getElementById("reactSum").textContent = reactSum;
+        document.getElementById("pythonSum").textContent = pythonSum;
+        document.getElementById("totalMarksFlutter").textContent = totalMarksFlutter;
+        document.getElementById("totalMarksReact").textContent = totalMarksReact;
+        document.getElementById("totalMarksPython").textContent = totalMarksPython;
+        document.getElementById("outofFlutter").textContent = totalMarksPython * 10;
+        document.getElementById("outofReact").textContent = totalMarksPython * 10;
+        document.getElementById("outofPython").textContent = totalMarksPython * 10;
+
+
+        // Generate pie chart
+        generatePieChart(flutterSum, reactSum, pythonSum);
+    }).catch((error) => {
+        console.error("Error getting documents: ", error);
+    });
+}
+
+function generatePieChart(flutterSum, reactSum, pythonSum) {
+    // Get canvas element for chart
+    var ctx = document.getElementById('chartPie').getContext('2d');
+
+    // Create data for chart
+    var data = {
+        labels: ['Flutter', 'React', 'Python'],
+        datasets: [{
+            label: 'Marks',
+            data: [flutterSum, reactSum, pythonSum],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+            ]
+        }]
+    };
+
+    // Create options for chart
+    var options = {
+        legend: {
+            position: 'bottom',
+            align: 'start'
+        }
+    };
+
+    // Create pie chart
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: options
+    });
+}
+
+calculateSumOfMarks();
+
+
+
+        // Fetch scores from Firestore
+        getDocs(scoresCollection).then(querySnapshot => {
+            querySnapshot.forEach(doc => {
+                // For each document, get the score and category
+                const { category, score } = doc.data();
+
+                // Add the score to the scores array
+                scores.push({ category, score });
+
+                // Add the score to the total score
+                totalScore += score;
+            });
+
+            // Calculate total score based on the formula you provided
+            totalScore = 10 * querySnapshot.size;
+
+            // Render the radial bar chart with the calculated score percentage
+            renderRadialBarChart(scores.reduce((acc, curr) => acc + curr.score, 0), totalScore);
+
+            // Populate user information
+            document.getElementById('userName').textContent = localStorage.getItem('username');
+
+            // Total quizzes attempted
+            const totalQuizzes = querySnapshot.size;
+            document.getElementById('totalQuizzes').textContent = totalQuizzes;
+
+            // User's total score
+            // Sum up all scores in the scores array
+            const userTotalScore = scores.reduce((total, scoreObj) => total + scoreObj.score, 0);
+            document.getElementById('userScore').textContent = userTotalScore;
+
+            // Total available score
+            document.getElementById('totalScore').textContent = totalScore;
+
+        });
+
+
+
+
+
+
+
+
+
+
+        // Function to render the radial bar chart
+        function renderRadialBarChart(score, total) {
+            const percentage = (score / total) * 100;
+
+            var options = {
+                series: [percentage],
+                chart: {
+                    height: 350,
+                    type: 'radialBar',
+                    offsetY: -10
+                },
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -135,
+                        endAngle: 135,
+                        dataLabels: {
+                            name: {
+                                fontSize: '16px',
+                                color: undefined,
+                                offsetY: 120
+                            },
+                            value: {
+                                offsetY: 76,
+                                fontSize: '22px',
+                                color: 'white',
+                                formatter: function (val) {
+                                    return val + "%";
+                                }
+                            }
+                        }
+                    }
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'light',
+                        shadeIntensity: 0.15,
+                        inverseColors: false,
+                        opacityFrom: 1,
+                        opacityTo: 1,
+                        stops: [0, 50, 65, 91]
+                    },
+                },
+                stroke: {
+                    dashArray: 4
+                },
+                labels: ['Overall Progress'],
+            };
+
+            var chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+        }
+
+
+
+    </script>
+
+    <!-- Updated HTML structure for sidebar and content -->
+    <div class="sidebar">
+        <nav class="nav">
+            <div class="nav-upper-options">
+                <div class="nav-option option1">
+                    <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210182148/Untitled-design-(29).png"
+                        class="nav-img" alt="dashboard">
+                    <h3 class="sidetxt">Dashboard</h3>
+                </div>
+
+                <div class="option2 nav-option">
+                    <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210183322/9.png" class="nav-img"
+                        alt="articles">
+                    <h3 class="sidetxt">Articles</h3>
+                </div>
+
+                <div class="nav-option option3">
+                    <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210183320/5.png" class="nav-img"
+                        alt="report">
+                    <h3 class="sidetxt">Report</h3>
+                </div>
+
+                <div class="nav-option option4">
+                    <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210183321/6.png" class="nav-img"
+                        alt="institution">
+                    <h3 class="sidetxt">Institution</h3>
+                </div>
+
+                <a href="{% url 'user-profile' pk=user.pk %}">
+                    <div class="nav-option option5">
+                        <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210183323/10.png"
+                            class="nav-img" alt="blog">
+                        <h3 class="sidetxt">Profile</h3>
+                    </div>
+                </a>
+
+
+                <div class="nav-option option6">
+                    <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210183320/4.png" class="nav-img"
+                        alt="settings">
+                    <h3 class="sidetxt">Settings</h3>
+                </div>
+
+                <div class="nav-option logout">
+                    <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210183321/7.png" class="nav-img"
+                        alt="logout">
+                    <h3 class="sidetxt">Logout</h3>
+                </div>
+
+            </div>
+        </nav>
+    </div>
+
+    <div class="box-container">
+
+        <div class="box box1">
+            <div class="text">
+                <h2 class="topic-heading"><span id="userCount"></span></h2>
+                <h2 class="topic">Total Users</h2>
+            </div>
+
+            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210184645/Untitled-design-(31).png"
+                alt="Views">
+        </div>
+
+        <div class="box box2">
+            <div class="text">
+                <h2 class="topic-heading"> <span id="quizScoreUserCount"></h2>
+                <h2 class="topic">Total Quiz Solvers</h2>
+            </div>
+
+            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210185030/14.png" alt="likes">
+        </div>
+
+        <div class="box box3">
+            <div class="text">
+                <h2 class="topic-heading">3</h2>
+                <h2 class="topic">Subjects</h2>
+            </div>
+
+            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210184645/Untitled-design-(32).png"
+                alt="comments">
+        </div>
+
+        <div class="box box4">
+            <div class="text">
+                <h2 class="topic-heading"><span id="sumOfQuizScoresLength"></span></h2>
+                <h2 class="topic">Total Quizes Solved</h2>
+            </div>
+
+            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20221210185029/13.png" alt="published">
+        </div>
+    </div>
+
+
+    <!-- Updated HTML structure for content -->
+    <div class="content">
+        <h2 id="dashboard-title">${username}'s Dashboard</h2>
+        <div id="boxheading"> 
+            <h2>Subject-Wise Progress :</h2>
+        </div>
+        <div class="containerrs">
+            <div class="rowws">
+                <div class="boxxs">
+                    <div class="contentts">
+                        <p>Flutter</p>
+                        <p>Total Attempts: <span id="totalMarksFlutter"></span></p>
+                        <p>Total Marks: <span id="flutterSum"></span> / <span id="outofFlutter"></span></p>
+                    </div>
+                </div>
+                <div class="boxxs">
+                    <div class="contentts">
+                        <p>React</p>
+                        <p>Total Attempts: <span id="totalMarksReact"></span></p>
+                        <p>Total Marks: <span id="reactSum"></span> / <span id="outofReact"></span></p>
+                    </div>
+                </div>
+                <div class="boxxs">
+                    <div class="contentts">
+                        <p>Python</p>
+                        <p>Total Attempts: <span id="totalMarksPython"></span></p>
+                        <p>Total Marks: <span id="pythonSum"></span> / <span id="outofPython"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    {% endblock %}

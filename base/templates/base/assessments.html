@@ -1,326 +1,408 @@
-{% extends 'main.html' %} 
+{% extends 'main.html' %}
 {% block content %}
 
 <style>
-    .btn-blue {
-      background-color: skyblue;
-      color: black;
-    }
+  .btn-blue {
+    background-color: skyblue;
+    color: black;
+  }
 
-    #submit-btn {
-      display: block;
-      margin: 0 auto;
-      background-color: skyblue;
-      color: black;
-      font-size: 18px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+  #submit-btn {
+    display: block;
+    margin: 0 auto;
+    background-color: skyblue;
+    color: black;
+    font-size: 18px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 
-    #submit-btn:hover {
+  #submit-btn:hover {
     background-color: black;
     color: white;
-    }
+  }
 
 
-    .btn-blue:hover {
-        color: white;
-        background-color: black;    
-    }
-
-
+  .btn-blue:hover {
+    color: white;
+    background-color: black;
+  }
 </style>
 
-<script>
-    function loadQuiz(category) {
-        var contentDiv = document.getElementById("quiz-content");
-        var instructions = document.getElementById("quiz-instructions");
-        instructions.style.display = "none"; // Hide the instructions
+<!-- Load Firebase JavaScript SDK -->
+<!-- Load Firebase JavaScript SDK as ES6 modules -->
+<script type="module">
+  // Your Firebase configuration
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-analytics.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-        // Show the quiz content div
-        contentDiv.style.display = "block";
+  const firebaseConfig = {
+    apiKey: "AIzaSyDestI57XONc_T9yB4_6FcsG1-Sh7fAX-w",
+    authDomain: "miniprj-sem6.firebaseapp.com",
+    projectId: "miniprj-sem6",
+    storageBucket: "miniprj-sem6.appspot.com",
+    messagingSenderId: "691832916562",
+    appId: "1:691832916562:web:d85806c2d3d33a3fa16d8b",
+    measurementId: "G-G14VXQ8BH5"
+  };
 
-      if (category === 'flutter') {
-        contentDiv.innerHTML = `
-        <h2 style="text-align: center; font-size: 24px; color: white;">Flutter Quiz</h2>
-          <form id="quiz-form" onsubmit="submitQuiz(event)">
-             <br>   
-            <p>Question 1: What is Flutter?</p>
-            <input type="radio" name="q1" value="a"> a) A programming language<br>
-            <input type="radio" name="q1" value="b"> b) A mobile development framework<br>
-            <input type="radio" name="q1" value="c"> c) A database management system<br>
-            <br>
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app); // Initialize Firestore
 
-            <p>Question 2: Which programming language is primarily used in Flutter?</p>
-            <input type="radio" name="q2" value="a"> a) Java<br>
-            <input type="radio" name="q2" value="b"> b) Dart<br>
-            <input type="radio" name="q2" value="c"> c) Kotlin<br>
-            <br>
+  document.addEventListener('DOMContentLoaded', () => {
+    const quizButtons = document.querySelectorAll('.btn');
 
-            <p>Question 3: What is the main advantage of using Flutter?</p>
-            <input type="radio" name="q3" value="a"> a) Native performance<br>
-            <input type="radio" name="q3" value="b"> b) Wide range of libraries<br>
-            <input type="radio" name="q3" value="c"> c) Cross-platform compatibility<br>
-            <br>
+    quizButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const category = button.getAttribute('data-category');
+        loadQuiz(category);
+      });
+    });
+  });
 
-            <p>Question 4: What is a "widget" in Flutter?</p>
-            <input type="radio" name="q4" value="a"> a) A unit of measurement<br>
-            <input type="radio" name="q4" value="b"> b) A graphical user interface element<br>
-            <input type="radio" name="q4" value="c"> c) A database table<br>
-            <br>
+  function loadQuiz(category) {
+    var contentDiv = document.getElementById("quiz-content");
+    var instructions = document.getElementById("quiz-instructions");
+    instructions.style.display = "none"; // Hide the instructions
 
-            <p>Question 5: What is "hot reload" in Flutter?</p>
-            <input type="radio" name="q5" value="a"> a) A way to heat up the device<br>
-            <input type="radio" name="q5" value="b"> b) A feature for quickly seeing changes without restarting the app<br>
-            <input type="radio" name="q5" value="c"> c) A networking feature<br>
-            <br>
+    // Show the quiz content div
+    contentDiv.style.display = "block";
 
-            <p>Question 6: Which IDE is commonly used for Flutter development?</p>
-            <input type="radio" name="q6" value="a"> a) Android Studio<br>
-            <input type="radio" name="q6" value="b"> b) Visual Studio Code<br>
-            <input type="radio" name="q6" value="c"> c) Xcode<br>
-            <br>
+    if (category === 'flutter') {
+      contentDiv.innerHTML = `
+    <h2 style="text-align: center; font-size: 24px; color: white;">Flutter Quiz</h2>
+    <form id="quiz-form">
+        <br>   
+        <p>Question 1: What is Flutter?</p>
+        <input type="radio" name="q1" value="a"> a) A programming language<br>
+        <input type="radio" name="q1" value="b"> b) A mobile development framework<br>
+        <input type="radio" name="q1" value="c"> c) A database management system<br>
+        <br>
 
-            <p>Question 7: What is a "stateful widget" in Flutter?</p>
-            <input type="radio" name="q7" value="a"> a) A widget with no state<br>
-            <input type="radio" name="q7" value="b"> b) A widget that can change its state during its lifetime<br>
-            <input type="radio" name="q7" value="c"> c) A widget without any graphical representation<br>
-            <br>
+        <p>Question 2: Which programming language is primarily used in Flutter?</p>
+        <input type="radio" name="q2" value="a"> a) Java<br>
+        <input type="radio" name="q2" value="b"> b) Dart<br>
+        <input type="radio" name="q2" value="c"> c) Kotlin<br>
+        <br>
 
-            <p>Question 8: What is the function of the pubspec.yaml file in a Flutter project?</p>
-            <input type="radio" name="q8" value="a"> a) To configure the project's build settings<br>
-            <input type="radio" name="q8" value="b"> b) To define project dependencies and metadata<br>
-            <input type="radio" name="q8" value="c"> c) To write the main application code<br>
-            <br>
+        <p>Question 3: What is the main advantage of using Flutter?</p>
+        <input type="radio" name="q3" value="a"> a) Native performance<br>
+        <input type="radio" name="q3" value="b"> b) Wide range of libraries<br>
+        <input type="radio" name="q3" value="c"> c) Cross-platform compatibility<br>
+        <br>
 
-            <p>Question 9: What is the main layout mechanism used in Flutter?</p>
-            <input type="radio" name="q9" value="a"> a) XML<br>
-            <input type="radio" name="q9" value="b"> b) HTML<br>
-            <input type="radio" name="q9" value="c"> c) Widgets composition<br>
-            <br>
+        <p>Question 4: What is a "widget" in Flutter?</p>
+        <input type="radio" name="q4" value="a"> a) A unit of measurement<br>
+        <input type="radio" name="q4" value="b"> b) A graphical user interface element<br>
+        <input type="radio" name="q4" value="c"> c) A database table<br>
+        <br>
 
-            <p>Question 10: How can you handle user input in Flutter?</p>
-            <input type="radio" name="q10" value="a"> a) Using the console<br>
-            <input type="radio" name="q10" value="b"> b) Using forms and text fields<br>
-            <input type="radio" name="q10" value="c"> c) Using a database<br>
-            <br>
+        <p>Question 5: What is "hot reload" in Flutter?</p>
+        <input type="radio" name="q5" value="a"> a) A way to heat up the device<br>
+        <input type="radio" name="q5" value="b"> b) A feature for quickly seeing changes without restarting the app<br>
+        <input type="radio" name="q5" value="c"> c) A networking feature<br>
+        <br>
 
+        <p>Question 6: Which IDE is commonly used for Flutter development?</p>
+        <input type="radio" name="q6" value="a"> a) Android Studio<br>
+        <input type="radio" name="q6" value="b"> b) Visual Studio Code<br>
+        <input type="radio" name="q6" value="c"> c) Xcode<br>
+        <br>
 
-            <!-- Add more questions -->
-          
-            <button type="submit"  id="submit-btn" style="font-weight: bold" >Submit Quiz</button>
+        <p>Question 7: What is a "stateful widget" in Flutter?</p>
+        <input type="radio" name="q7" value="a"> a) A widget with no state<br>
+        <input type="radio" name="q7" value="b"> b) A widget that can change its state during its lifetime<br>
+        <input type="radio" name="q7" value="c"> c) A widget without any graphical representation<br>
+        <br>
 
-            <br>
-            <br>
-          </form>
-        `;
+        <p>Question 8: What is the function of the pubspec.yaml file in a Flutter project?</p>
+        <input type="radio" name="q8" value="a"> a) To configure the project's build settings<br>
+        <input type="radio" name="q8" value="b"> b) To define project dependencies and metadata<br>
+        <input type="radio" name="q8" value="c"> c) To write the main application code<br>
+        <br>
+
+        <p>Question 9: What is the main layout mechanism used in Flutter?</p>
+        <input type="radio" name="q9" value="a"> a) XML<br>
+        <input type="radio" name="q9" value="b"> b) HTML<br>
+        <input type="radio" name="q9" value="c"> c) Widgets composition<br>
+        <br>
+
+        <p>Question 10: How can you handle user input in Flutter?</p>
+        <input type="radio" name="q10" value="a"> a) Using the console<br>
+        <input type="radio" name="q10" value="b"> b) Using forms and text fields<br>
+        <input type="radio" name="q10" value="c"> c) Using a database<br>
+        <br>
+
+        <!-- Add more questions -->
+        
+        <button type="submit" id="submit-btn" style="font-weight: bold">Submit Quiz</button>
+
+        <br>
+        <br>
+    </form>
+`;
     } else if (category === 'react') {
-        contentDiv.innerHTML = `
-          <h2 style="text-align: center; font-size: 24px; color: white;" >React Quiz</h2>
-          <form id="quiz-form" onsubmit="submitQuiz(event)">
-            <br>
-            <p>What is React?</p>
-            <input type="radio" name="q1" value="a"> a) A programming language<br>
-            <input type="radio" name="q1" value="b"> b) A front-end JavaScript library<br>
-            <input type="radio" name="q1" value="c"> c) A back-end framework<br>
-            <br>
-          
-            <p>What does JSX stand for in React?</p>
-            <input type="radio" name="q2" value="a"> a) JavaScript XML<br>
-            <input type="radio" name="q2" value="b"> b) JavaScript Extended<br>
-            <input type="radio" name="q2" value="c"> c) JavaScript External<br>
-            <br>
-            
-            <p>What is the virtual DOM in React?</p>
-            <input type="radio" name="q3" value="a"> a) A backup copy of the browser's DOM<br>
-            <input type="radio" name="q3" value="b"> b) A lightweight representation of the DOM in memory<br>
-            <input type="radio" name="q3" value="c"> c) A separate DOM for testing purposes<br>
-            <br>
-            
-            <p>Which lifecycle method is called after the component is rendered for the first time?</p>
-            <input type="radio" name="q4" value="a"> a) componentDidMount()<br>
-            <input type="radio" name="q4" value="b"> b) componentDidUpdate()<br>
-            <input type="radio" name="q4" value="c"> c) componentWillMount()<br>
-            <br>
-            
-            <p>What is a "prop" in React?</p>
-            <input type="radio" name="q5" value="a"> a) A built-in React component<br>
-            <input type="radio" name="q5" value="b"> b) An object that stores HTML attributes<br>
-            <input type="radio" name="q5" value="c"> c) Data passed from parent to child components<br>
-            <br>
-            
-            <p>What is a "state" in React?</p>
-            <input type="radio" name="q6" value="a"> a) A built-in React component<br>
-            <input type="radio" name="q6" value="b"> b) An object that stores component data that may change over time<br>
-            <input type="radio" name="q6" value="c"> c) A JavaScript function<br>
-            <br>
-            
-            <p>What is the purpose of the setState() method in React?</p>
-            <input type="radio" name="q7" value="a"> a) To set the initial state of a component<br>
-            <input type="radio" name="q7" value="b"> b) To update the state of a component and re-render it<br>
-            <input type="radio" name="q7" value="c"> c) To fetch data from an API<br>
-            <br>
-            
-            <p>What is a "key" in React?</p>
-            <input type="radio" name="q8" value="a"> a) A unique identifier for dynamically rendered list items<br>
-            <input type="radio" name="q8" value="b"> b) A reserved keyword in JSX<br>
-            <input type="radio" name="q8" value="c"> c) A method for handling user input<br>
-            <br>
-            
-            <p>What is the purpose of the React Router library?</p>
-            <input type="radio" name="q9" value="a"> a) To manage state in React applications<br>
-            <input type="radio" name="q9" value="b"> b) To handle routing and navigation in React applications<br>
-            <input type="radio" name="q9" value="c"> c) To create animations in React applications<br>
-            <br>
-            
-            <p>What is Redux in React?</p>
-            <input type="radio" name="q10" value="a"> a) A built-in React feature for managing state<br>
-            <input type="radio" name="q10" value="b"> b) A third-party library for managing application state<br>
-            <input type="radio" name="q10" value="c"> c) A React component for creating forms<br>
-            <br>
-            
-            <button type="submit"  id="submit-btn" style="font-weight: bold" >Submit Quiz</button>
-            
-            <br>
-            <br>
-          </form>
-        `;
-    } else if (category === 'python') {
-        contentDiv.innerHTML = `
-          <h2 style="text-align: center; font-size: 24px; color: white;">Python Quiz</h2>
-          <form id="quiz-form" onsubmit="submitQuiz(event)">
-            <br>
-            <p>What is Python?</p>
-            <input type="radio" name="q1" value="a"> a) A high-level programming language<br>
-            <input type="radio" name="q1" value="b"> b) A database management system<br>
-            <input type="radio" name="q1" value="c"> c) A web server<br>
-            <br>
-          
-            <p>What are the main features of Python?</p>
-            <input type="radio" name="q2" value="a"> a) Dynamic typing, automatic memory management, and high-level data structures<br>
-            <input type="radio" name="q2" value="b"> b) Static typing, manual memory management, and low-level data structures<br>
-            <input type="radio" name="q2" value="c"> c) Dynamic typing, manual memory management, and low-level data structures<br>
-            <br>
-            
-            <p>What is PEP 8 in Python?</p>
-            <input type="radio" name="q3" value="a"> a) The Python Enhancement Proposal for version 8<br>
-            <input type="radio" name="q3" value="b"> b) The Python Style Guide<br>
-            <input type="radio" name="q3" value="c"> c) The Python Error Protocol version 8<br>
-            <br>
-            
-            <p>What is the purpose of the 'if' statement in Python?</p>
-            <input type="radio" name="q4" value="a"> a) To declare a loop<br>
-            <input type="radio" name="q4" value="b"> b) To define a function<br>
-            <input type="radio" name="q4" value="c"> c) To conditionally execute code<br>
-            <br>
-            
-            <p>Which keyword is used for defining a function in Python?</p>
-            <input type="radio" name="q5" value="a"> a) func<br>
-            <input type="radio" name="q5" value="b"> b) define<br>
-            <input type="radio" name="q5" value="c"> c) def<br>
-            <br>
-            
-            <p>What is a 'list' in Python?</p>
-            <input type="radio" name="q6" value="a"> a) A data structure that stores elements in key-value pairs<br>
-            <input type="radio" name="q6" value="b"> b) A data structure that stores elements in a sequence<br>
-            <input type="radio" name="q6" value="c"> c) A reserved keyword in Python<br>
-            <br>
-            
-            <p>How do you comment a single line in Python?</p>
-            <input type="radio" name="q7" value="a"> a) Using //<br>
-            <input type="radio" name="q7" value="b"> b) Using #<br>
-            <input type="radio" name="q7" value="c"> c) Using <!-- --> <br>
-            <br>
-            
-            <p>What is the purpose of the 'import' keyword in Python?</p>
-            <input type="radio" name="q8" value="a"> a) To define a module<br>
-            <input type="radio" name="q8" value="b"> b) To import modules or packages into a Python script<br>
-            <input type="radio" name="q8" value="c"> c) To define a class<br>
-            <br>
-            
-            <p>What is the purpose of the 'lambda' keyword in Python?</p>
-            <input type="radio" name="q9" value="a"> a) To define anonymous functions<br>
-            <input type="radio" name="q9" value="b"> b) To declare a variable<br>
-            <input type="radio" name="q9" value="c"> c) To define a class<br>
-            <br>
-            
-            <p>What is a 'tuple' in Python?</p>
-            <input type="radio" name="q10" value="a"> a) A data structure that stores elements in key-value pairs<br>
-            <input type="radio" name="q10" value="b"> b) A data structure that stores elements in a sequence<br>
-            <input type="radio" name="q10" value="c"> c) An immutable sequence of elements<br>
-            <br>
-            
-           <button type="submit"  id="submit-btn" style="font-weight: bold" >Submit Quiz</button>
-            
-            <br>
-            <br>
-          </form>
-          
+      contentDiv.innerHTML = `
+      <h2 style="text-align: center; font-size: 24px; color: white;" >React Quiz</h2>
+      <form id="quiz-form" onsubmit="submitQuiz(event)">
+        <br>
+        <p>What is React?</p>
+        <input type="radio" name="q1" value="a"> a) A programming language<br>
+        <input type="radio" name="q1" value="b"> b) A front-end JavaScript library<br>
+        <input type="radio" name="q1" value="c"> c) A back-end framework<br>
+        <br>
+      
+        <p>What does JSX stand for in React?</p>
+        <input type="radio" name="q2" value="a"> a) JavaScript XML<br>
+        <input type="radio" name="q2" value="b"> b) JavaScript Extended<br>
+        <input type="radio" name="q2" value="c"> c) JavaScript External<br>
+        <br>
+        
+        <p>What is the virtual DOM in React?</p>
+        <input type="radio" name="q3" value="a"> a) A backup copy of the browser's DOM<br>
+        <input type="radio" name="q3" value="b"> b) A lightweight representation of the DOM in memory<br>
+        <input type="radio" name="q3" value="c"> c) A separate DOM for testing purposes<br>
+        <br>
+        
+        <p>Which lifecycle method is called after the component is rendered for the first time?</p>
+        <input type="radio" name="q4" value="a"> a) componentDidMount()<br>
+        <input type="radio" name="q4" value="b"> b) componentDidUpdate()<br>
+        <input type="radio" name="q4" value="c"> c) componentWillMount()<br>
+        <br>
+        
+        <p>What is a "prop" in React?</p>
+        <input type="radio" name="q5" value="a"> a) A built-in React component<br>
+        <input type="radio" name="q5" value="b"> b) An object that stores HTML attributes<br>
+        <input type="radio" name="q5" value="c"> c) Data passed from parent to child components<br>
+        <br>
+        
+        <p>What is a "state" in React?</p>
+        <input type="radio" name="q6" value="a"> a) A built-in React component<br>
+        <input type="radio" name="q6" value="b"> b) An object that stores component data that may change over time<br>
+        <input type="radio" name="q6" value="c"> c) A JavaScript function<br>
+        <br>
+        
+        <p>What is the purpose of the setState() method in React?</p>
+        <input type="radio" name="q7" value="a"> a) To set the initial state of a component<br>
+        <input type="radio" name="q7" value="b"> b) To update the state of a component and re-render it<br>
+        <input type="radio" name="q7" value="c"> c) To fetch data from an API<br>
+        <br>
+        
+        <p>What is a "key" in React?</p>
+        <input type="radio" name="q8" value="a"> a) A unique identifier for dynamically rendered list items<br>
+        <input type="radio" name="q8" value="b"> b) A reserved keyword in JSX<br>
+        <input type="radio" name="q8" value="c"> c) A method for handling user input<br>
+        <br>
+        
+        <p>What is the purpose of the React Router library?</p>
+        <input type="radio" name="q9" value="a"> a) To manage state in React applications<br>
+        <input type="radio" name="q9" value="b"> b) To handle routing and navigation in React applications<br>
+        <input type="radio" name="q9" value="c"> c) To create animations in React applications<br>
+        <br>
+        
+        <p>What is Redux in React?</p>
+        <input type="radio" name="q10" value="a"> a) A built-in React feature for managing state<br>
+        <input type="radio" name="q10" value="b"> b) A third-party library for managing application state<br>
+        <input type="radio" name="q10" value="c"> c) A React component for creating forms<br>
+        <br>
+        
+        <button type="submit"  id="submit-btn" style="font-weight: bold" >Submit Quiz</button>
+        
+        <br>
+        <br>
+      </form>
+    `;
+  } else if (category === 'python') {
+    contentDiv.innerHTML = `
+      <h2 style="text-align: center; font-size: 24px; color: white;">Python Quiz</h2>
+      <form id="quiz-form" onsubmit="submitQuiz(event)">
+        <br>
+        <p>What is Python?</p>
+        <input type="radio" name="q1" value="a"> a) A high-level programming language<br>
+        <input type="radio" name="q1" value="b"> b) A database management system<br>
+        <input type="radio" name="q1" value="c"> c) A web server<br>
+        <br>
+      
+        <p>What are the main features of Python?</p>
+        <input type="radio" name="q2" value="a"> a) Dynamic typing, automatic memory management, and high-level data structures<br>
+        <input type="radio" name="q2" value="b"> b) Static typing, manual memory management, and low-level data structures<br>
+        <input type="radio" name="q2" value="c"> c) Dynamic typing, manual memory management, and low-level data structures<br>
+        <br>
+        
+        <p>What is PEP 8 in Python?</p>
+        <input type="radio" name="q3" value="a"> a) The Python Enhancement Proposal for version 8<br>
+        <input type="radio" name="q3" value="b"> b) The Python Style Guide<br>
+        <input type="radio" name="q3" value="c"> c) The Python Error Protocol version 8<br>
+        <br>
+        
+        <p>What is the purpose of the 'if' statement in Python?</p>
+        <input type="radio" name="q4" value="a"> a) To declare a loop<br>
+        <input type="radio" name="q4" value="b"> b) To define a function<br>
+        <input type="radio" name="q4" value="c"> c) To conditionally execute code<br>
+        <br>
+        
+        <p>Which keyword is used for defining a function in Python?</p>
+        <input type="radio" name="q5" value="a"> a) func<br>
+        <input type="radio" name="q5" value="b"> b) define<br>
+        <input type="radio" name="q5" value="c"> c) def<br>
+        <br>
+        
+        <p>What is a 'list' in Python?</p>
+        <input type="radio" name="q6" value="a"> a) A data structure that stores elements in key-value pairs<br>
+        <input type="radio" name="q6" value="b"> b) A data structure that stores elements in a sequence<br>
+        <input type="radio" name="q6" value="c"> c) A reserved keyword in Python<br>
+        <br>
+        
+        <p>How do you comment a single line in Python?</p>
+        <input type="radio" name="q7" value="a"> a) Using //<br>
+        <input type="radio" name="q7" value="b"> b) Using #<br>
+        <input type="radio" name="q7" value="c"> c) Using <!-- --> <br>
+        <br>
+        
+        <p>What is the purpose of the 'import' keyword in Python?</p>
+        <input type="radio" name="q8" value="a"> a) To define a module<br>
+        <input type="radio" name="q8" value="b"> b) To import modules or packages into a Python script<br>
+        <input type="radio" name="q8" value="c"> c) To define a class<br>
+        <br>
+        
+        <p>What is the purpose of the 'lambda' keyword in Python?</p>
+        <input type="radio" name="q9" value="a"> a) To define anonymous functions<br>
+        <input type="radio" name="q9" value="b"> b) To declare a variable<br>
+        <input type="radio" name="q9" value="c"> c) To define a class<br>
+        <br>
+        
+        <p>What is a 'tuple' in Python?</p>
+        <input type="radio" name="q10" value="a"> a) A data structure that stores elements in key-value pairs<br>
+        <input type="radio" name="q10" value="b"> b) A data structure that stores elements in a sequence<br>
+        <input type="radio" name="q10" value="c"> c) An immutable sequence of elements<br>
+        <br>
+        
+        <button type="submit"  id="submit-btn" style="font-weight: bold" >Submit Quiz</button>
+        
+        <br>
+        <br>
+      </form>
         `;
       }
-    }
-    
-    function submitQuiz(event) {
+
+    // Add event listener to the form
+    var quizForm = document.getElementById("quiz-form");
+    quizForm.addEventListener('submit', submitQuiz);
+
+    // Add event listener to the submit button
+    var submitButton = document.getElementById("submit-btn");
+    submitButton.addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent default button behavior
+      submitQuiz(event, category); // Call submitQuiz function with category
+    });
+  }
+
+  async function submitQuiz(event, category) {
     event.preventDefault(); // Prevent default form submission
     var score = 0;
     var totalQuestions = 10;
     var allQuestionsAttempted = true;
+    var username = localStorage.getItem("username");
+
+    if (!username) {
+      alert("Username not found. Please enter a username.");
+      return;
+    }
 
     // Check if all questions are attempted
     for (var i = 1; i <= totalQuestions; i++) {
-        var selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
-        if (selectedOption === null) {
-            allQuestionsAttempted = false;
-            break;
-        }
+      var selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+      if (selectedOption === null) {
+        allQuestionsAttempted = false;
+        break;
+      }
     }
 
     if (!allQuestionsAttempted) {
-        alert("Please attempt all questions.");
-        return;
+      alert("Please attempt all questions.");
+      return;
     }
 
     // Calculate score if all questions are attempted
     for (var i = 1; i <= totalQuestions; i++) {
-        var selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
-        if (selectedOption !== null && selectedOption.value === "b") {
-            score++; // Increment score for correct answer
-        }
+      var selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+      if (selectedOption !== null && selectedOption.value === "b") {
+        score++; // Increment score for correct answer
+      }
     }
+
+    // Store the score in local storage
+    var scores = JSON.parse(localStorage.getItem("quizScores")) || {};
+    scores[username] = score;
+    
+    // Send the score to Firestore
+    try {
+      const userRef = doc(db, "users", username);
+
+      // Check if the user document exists
+      const userSnapshot = await getDoc(userRef);
+
+      if (!userSnapshot.exists()) {
+        // If user document doesn't exist, create it
+        await setDoc(userRef, { name: username });
+      }
+
+      // Get the reference to the QuizScores subcollection
+      const quizScoresRef = collection(userRef, "QuizScores");
+
+      // Add the quiz score document to the QuizScores subcollection
+      await addDoc(quizScoresRef, { score: score , category: category });
+
+      console.log("Score successfully stored in Firestore!");
+    } catch (error) {
+      console.error("Error writing score to Firestore: ", error);
+    }
+
 
     // Display score
     alert(`Your score: ${score} out of ${totalQuestions}`);
-}
+  }
 
 </script>
 
+
 <div style="max-width: 800px; margin: 20px auto">
-    <div class="layout__boxTitle" style="margin-bottom: 2%; display: flex; justify-content: space-between;">
-      <div style="display: flex">
-        <a href="{% url 'home'  %}">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                viewBox="0 0 32 32">
-                <title>arrow-left</title>
-                <path
-                    d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z">
-                </path>
-                </svg>
-            </a>
-            <h3 style="padding-left: 2ch; text-align: center; font-size: 15px; color: white;" >Solve Quizzes</h3>
-        </div>
-        <div>
-            <button class="btn btn-blue" onclick="loadQuiz('flutter')">Flutter</button>
-            <span style="margin: 0 5px;"></span> <!-- Add some space between the buttons -->
-            <button class="btn btn-blue" onclick="loadQuiz('react')">React</button>
-            <span style="margin: 0 5px;"></span> <!-- Add some space between the buttons -->
-            <button class="btn btn-blue" onclick="loadQuiz('python')">Python</button>
-        </div>
-        
-        </div>
-        <div><p id="quiz-instructions" style="text-align: center; padding-top: 25vh; font-size: 24px; color: gainsboro; font-weight: bold;" >Press above buttons to apply for quiz</p></div>
-        <div id="quiz-content"></div>
+  <div class="layout__boxTitle" style="margin-bottom: 2%; display: flex; justify-content: space-between;">
+    <div style="display: flex">
+      <a href="{% url 'home'  %}">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+          <title>arrow-left</title>
+          <path
+            d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z">
+          </path>
+        </svg>
+      </a>
+      <h3 style="padding-left: 2ch; text-align: center; font-size: 15px; color: white;">Solve Quizzes</h3>
+    </div>
+    <div>
+      <a href="{% url 'scores' %}">
+        <button class="btn btn-blue">Your Score</button>
+        <span style="margin: 0 5px;"></span> <!-- Add some space between the buttons -->
+      </a>
+      <button class="btn btn-blue" data-category="flutter">Flutter</button>
+      <span style="margin: 0 5px;"></span>
+      <button class="btn btn-blue" data-category="react">React</button>
+      <span style="margin: 0 5px;"></span>
+      <button class="btn btn-blue" data-category="python">Python</button>
+    </div>
+
+  </div>
+  <div>
+    <p id="quiz-instructions"
+      style="text-align: center; padding-top: 25vh; font-size: 24px; color: gainsboro; font-weight: bold;">Press above
+      buttons to apply for quiz</p>
+  </div>
+  <div id="quiz-content"></div>
 </div>
 
 {% endblock %}
